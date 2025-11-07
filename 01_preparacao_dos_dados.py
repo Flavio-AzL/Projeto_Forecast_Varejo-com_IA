@@ -215,3 +215,93 @@ if 'df_train' in locals() and 'df_stores' in locals() and 'df_features_tratado' 
 
 else:
     print("\n❌ ERRO: Um ou mais dataframes necessários para o merge não foram encontrados.")
+
+# ==============================================================================
+# Bloco 05: Engenharia de Features - Extração de Componentes de Data
+# ==============================================================================
+
+# Verifica se o dataframe final existe antes de prosseguir
+if 'df_final' in locals():
+    print("\n\n--- INICIANDO ENGENHARIA DE FEATURES ---")
+
+    # É uma boa prática criar uma cópia para esta nova fase
+    df_eng = df_final.copy()
+
+    # Extraindo componentes da coluna 'Date' para novas colunas
+    # O acesso a .dt permite usar propriedades de data/hora
+    df_eng['Ano'] = df_eng['Date'].dt.year
+    df_eng['Mes'] = df_eng['Date'].dt.month
+    df_eng['Dia'] = df_eng['Date'].dt.day
+    df_eng['Semana_do_Ano'] = df_eng['Date'].dt.isocalendar().week.astype(int)
+
+    print("[OK] Novas features de data criadas: Ano, Mes, Dia, Semana_do_Ano.")
+
+    # Vamos remover a coluna 'Date' original, pois já extraímos a informação
+    # necessária dela. Manter a data original pode confundir alguns modelos.
+    df_eng = df_eng.drop(columns=['Date'])
+    print("[OK] Coluna 'Date' original removida.")
+
+
+    # Verificação Final: Vamos olhar as novas colunas
+    print("\n\n--- VERIFICAÇÃO DO DATAFRAME APÓS ENGENHARIA DE FEATURES ---")
+    print(df_eng[['Ano', 'Mes', 'Dia', 'Semana_do_Ano']].head())
+    print(df_eng.head())
+
+else:
+    print("\n❌ ERRO: O dataframe df_final não foi encontrado. Execute os blocos anteriores.")
+
+# ================================================================================================
+# Bloco 06: Engenharia de Features - Tratamento de Variáveis Categóricas (One-Hot Encoding)
+# ================================================================================================
+
+# Verifica se o dataframe df_eng existe
+if 'df_eng' in locals():
+    print("\n\n--- TRATANDO VARIÁVEIS CATEGÓRICAS ---")
+
+    # A função pd.get_dummies é a forma mais fácil de aplicar One-Hot Encoding.
+    # Ela automaticamente identifica colunas de texto (object) e as converte.
+    # O argumento 'columns' especifica quais colunas queremos transformar.
+    # 'dtype=int' garante que as novas colunas sejam 0s e 1s inteiros.
+    df_processed = pd.get_dummies(df_eng, columns=['Type'], dtype=int)
+
+    print("[OK] Coluna 'Type' convertida para formato numérico via One-Hot Encoding.")
+
+
+    # Verificação Final: Vamos checar a estrutura final do dataframe
+    print("\n\n--- VERIFICAÇÃO FINAL DO DATAFRAME PROCESSADO ---")
+    df_processed.info()
+    
+    print("\n--- 5 Primeiras Linhas mostrando as novas colunas ---")
+    # Mostrando apenas as colunas relevantes para a verificação
+    print(df_processed[['Store', 'Type_A', 'Type_B', 'Type_C']].head())
+
+else:
+    print("\n❌ ERRO: O dataframe df_eng não foi encontrado. Execute os blocos anteriores.")
+
+# ==============================================================================
+# Bloco 07: Salvando o Dataframe Processado para a Próxima Etapa
+# ==============================================================================
+
+# Importando a biblioteca pathlib para lidar com caminhos de forma robusta
+from pathlib import Path
+
+# Verifica se o dataframe df_processed existe
+if 'df_processed' in locals():
+    
+    # Define a pasta de saída
+    pasta_saida = Path('data')
+    
+    # Cria a pasta 'data' se ela não existir (boa prática)
+    pasta_saida.mkdir(parents=True, exist_ok=True)
+    
+    # Constrói o caminho completo do arquivo de forma segura
+    caminho_arquivo_saida = pasta_saida / 'walmart_dados_processados.csv'
+    
+    # Salva o dataframe em um arquivo CSV, sem o índice do pandas
+    df_processed.to_csv(caminho_arquivo_saida, index=False)
+    
+    print(f"\n\n--- ETAPA DE PREPARAÇÃO CONCLUÍDA ---")
+    print(f"✅ Dataframe final salvo com sucesso em: {caminho_arquivo_saida}")
+
+else:
+    print("\n❌ ERRO: O dataframe df_processed não foi encontrado.")

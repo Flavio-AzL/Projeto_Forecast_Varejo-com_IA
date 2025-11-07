@@ -4,7 +4,7 @@ Versão: 1.0
 
 Data: 04 de Outubro de 2025
 
-Autores: \[Seu Nome e dos Colegas]
+Autores: \. Flávio Vieira de Araújo
 
 
 
@@ -154,3 +154,94 @@ A unificação foi realizada em duas etapas sequenciais, utilizando a função `
 2.  **Junção com `df_features_tratado`:** O dataframe resultante da primeira etapa foi unido ao de features, usando as colunas `Store` e `Date` como uma chave composta. Isso garantiu que cada registro de venda semanal fosse enriquecido com os dados contextuais e econômicos correspondentes.
 
 O dataframe `df_final` resultante contém todas as features em uma única tabela, pronto para a etapa de Engenharia de Features e, subsequentemente, a modelagem.
+
+## 5. Bloco 5: Engenharia de Features
+
+Esta fase consiste em criar novas variáveis (features) a partir dos dados existentes para melhorar a performance do modelo de Machine Learning. As novas features visam expor padrões nos dados que não são imediatamente aparentes.
+
+### 5.1. Features Derivadas da Data
+
+A primeira etapa da engenharia de features foi a decomposição da coluna `Date`. Foram criadas quatro novas colunas numéricas para capturar a sazonalidade e tendências temporais:
+
+* `Ano`
+* `Mes`
+* `Dia`
+* `Semana_do_Ano`
+
+Estas features permitirão ao modelo identificar padrões anuais (vendas maiores no final do ano), mensais (picos no início do mês) e semanais. Após a extração, a coluna `Date` original foi removida para evitar redundância de informação.
+
+### 5.2. Tratamento de Variáveis Categóricas
+
+A coluna `Type` (tipo da loja), que continha os valores textuais 'A', 'B' e 'C', foi convertida para um formato numérico utilizando a técnica de **One-Hot Encoding**.
+
+Este processo substituiu a coluna `Type` original por três novas colunas binárias: `Type_A`, `Type_B` e `Type_C`. Cada uma delas contém valores `1` ou `0`, indicando a qual tipo a loja pertence. Esta abordagem permite que o modelo de machine learning utilize a informação do tipo da loja sem criar uma relação de ordem artificial entre as categorias.
+
+Ao final desta etapa, o dataframe (`df_processed`) tornou-se inteiramente numérico, concluindo a fase de pré-processamento e engenharia de features.
+
+## 6. Bloco 8: Treinamento do Modelo de Machine Learning
+
+Com os dados devidamente processados, iniciou-se a fase de modelagem. O objetivo é treinar um modelo de regressão capaz de prever a variável `Weekly_Sales` com base nas outras features.
+
+## 6. Modelagem e Treinamento de Machine Learning
+
+Com os dados devidamente preparados, o projeto entrou na fase de modelagem preditiva. Para esta etapa, foi criado um novo script (`02_treinamento_modelo.py`) com o objetivo de treinar um modelo de regressão capaz de prever a variável `Weekly_Sales`.
+
+### 6.1. Metodologia
+
+O processo seguiu as seguintes etapas padrão de Machine Learning:
+
+1.  **Carregamento dos Dados:** O dataframe limpo e processado (`walmart_dados_processados.csv`) foi carregado como ponto de partida.
+2.  **Definição de Features (X) e Target (y):** A coluna `Weekly_Sales` foi definida como a variável alvo (y), e todas as outras colunas foram utilizadas como variáveis preditoras (X).
+3.  **Divisão em Treino e Teste:** O conjunto de dados foi dividido em 80% para treino e 20% para teste (`train_test_split`). Esta separação é crucial para garantir que a avaliação do modelo seja feita em dados nunca vistos por ele durante o treinamento, simulando um cenário real.
+
+### 6.2. Treinamento e Resultados do Modelo `RandomForestRegressor`
+
+* **Modelo Escolhido:** O primeiro modelo treinado foi o `RandomForestRegressor` da biblioteca `scikit-learn`. Este modelo é um "ensemble" de árvores de decisão, conhecido pela sua alta performance, robustez a outliers e capacidade de capturar interações complexas nos dados.
+
+* **Resultados de Performance:** Após o treinamento, o modelo foi avaliado no conjunto de teste, obtendo os seguintes resultados:
+
+    * **R-squared (R²): `97.76%`**
+        * **Interpretação:** Este é um resultado excelente. Significa que o modelo consegue explicar **97.76%** de toda a variabilidade presente nos dados de vendas semanais. Isso indica um altíssimo poder preditivo.
+
+    * **Mean Absolute Error (MAE): `$1,332.63`**
+        * **Interpretação:** Em média, as previsões de vendas do modelo para um dado departamento numa semana erram por aproximadamente **$1,333** (para mais ou para menos). Considerando a escala das vendas, este é um erro médio baixo e muito aceitável para um cenário de negócio.
+
+    * **Mean Squared Error (MSE): `$11,689,113.74`**
+        * **Interpretação:** Esta métrica penaliza erros maiores de forma mais significativa. O seu valor absoluto é usado principalmente para comparar diferentes modelos, onde um valor menor indica um modelo melhor.
+
+**Conclusão da Etapa:** O modelo inicial de Random Forest demonstrou uma performance extremamente forte, validando a qualidade da preparação dos dados e da engenharia de features realizadas nas etapas anteriores.
+
+### 6.3. Análise de Importância das Features
+
+Para entender quais fatores mais influenciam as vendas, foi realizada uma análise da importância das features do modelo `RandomForestRegressor`. O modelo atribui um score a cada feature com base no seu poder preditivo.
+
+**Principais Descobertas:**
+
+* **Fatores Dominantes:** A análise revelou que as características físicas e de identificação do ponto de venda são os preditores mais fortes. Juntas, as features **`Dept` (Departamento), `Size` (Tamanho da Loja) e `Store` (Loja)** correspondem a aproximadamente **87.5%** de toda a importância do modelo. Isso demonstra que saber *onde* a venda ocorre é o fator mais crucial para a previsão.
+
+* **Importância da Sazonalidade:** A feature **`Semana_do_Ano`** destacou-se como o indicador temporal mais relevante, superando `Mes` e `Dia`. Isso confirma a existência de fortes padrões de venda sazonais ligados a eventos específicos do ano (feriados, promoções, etc.).
+
+* **Contexto Económico:** As variáveis macroeconómicas como **`CPI` (inflação) e `Unemployment` (desemprego)** também se mostraram relevantes, atuando como fatores de ajuste fino para as previsões.
+
+Esta análise não só valida a performance do modelo, mas também gera insights de negócio valiosos, confirmando que as estratégias de previsão e gestão devem ser focadas primariamente ao nível de departamento e loja.
+
+
+## 7. Fase 3: Dashboard Interativo com Streamlit
+
+Para apresentar os resultados do projeto de forma interativa, foi desenvolvida uma aplicação web utilizando a biblioteca Streamlit.
+
+### 7.1. Bloco 11: Configuração Inicial da Aplicação
+
+O primeiro passo foi a criação do arquivo `app.py` e a configuração da estrutura básica da página, incluindo o título da aplicação (`st.title`) e um texto introdutório (`st.write`). A aplicação é iniciada localmente através do comando `streamlit run app.py`.
+
+### 7.2. Bloco 12: Carregamento de Dados e Modelo
+
+Para que a aplicação pudesse fazer previsões, foi necessário carregar o conjunto de dados processado (`walmart_dados_processados.csv`) e o modelo de IA treinado (`random_forest_regressor_v1.joblib`).
+
+Este carregamento foi otimizado utilizando as funções de cache do Streamlit:
+* `@st.cache_data`: Usado para carregar o DataFrame do pandas, garantindo que os dados só sejam lidos do disco uma vez.
+* `@st.cache_resource`: Usado para carregar o objeto do modelo (`.joblib`), mantendo o modelo pesado na memória para previsões instantâneas.
+
+A aplicação foi atualizada para exibir uma amostra dos dados carregados, confirmando o sucesso desta etapa.
+
+

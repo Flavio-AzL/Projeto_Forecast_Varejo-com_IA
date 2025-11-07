@@ -2,6 +2,10 @@
 venv/
 *.venv
 env/
+Apresentação Power Point/
+data/walmart_dados_processados.csv
+models/
+
 
 # Arquivos de cache do Python
 __pycache__/
