@@ -244,4 +244,58 @@ Este carregamento foi otimizado utilizando as funções de cache do Streamlit:
 
 A aplicação foi atualizada para exibir uma amostra dos dados carregados, confirmando o sucesso desta etapa.
 
+### 7.3. Bloco 13: Implementação do Simulador de Previsão
 
+O principal objetivo da aplicação é permitir que o utilizador realize previsões de vendas sob demanda. Para isso, foi criado um formulário interativo na barra lateral (`st.sidebar`).
+
+**Funcionalidades Implementadas:**
+
+* **Inputs do Utilizador:** Foram criados widgets do Streamlit (`selectbox`, `date_input`, `number_input`) para que o utilizador possa inserir os parâmetros principais da previsão:
+    * Loja (`Store`)
+    * Departamento (`Dept`)
+    * Data da Previsão
+    * Temperatura
+    * Se é Feriado
+
+* **Lógica de Previsão:** Ao clicar no botão "Gerar Previsão", a aplicação executa o seguinte fluxo:
+    1.  Coleta os inputs do utilizador.
+    2.  Extrai as features temporais (`Ano`, `Mes`, `Dia`, `Semana_do_Ano`) da data selecionada.
+    3.  Para as features contextuais não solicitadas (ex: `Size`, `CPI`, `Unemployment`, `Type`), a aplicação busca os dados mais recentes disponíveis para a loja selecionada, simulando um cenário realista.
+    4.  Monta um DataFrame de uma única linha com todas as 20 features, garantindo a ordem exata que o modelo espera.
+    5.  Executa o comando `modelo.predict()` para obter a previsão.
+    6.  Exibe o resultado (vendas previstas em dólares) de forma clara e destacada na página principal, utilizando o componente `st.metric`.
+
+
+### 7.4. Bloco 14: Reestruturação em Abas e Dashboard de Análise
+
+Para transformar a aplicação num "relatório dinâmico" completo, a interface foi reestruturada com o uso de Abas (`st.tabs`), separando as responsabilidades da aplicação:
+
+1.  **Aba "Análise dos Dados"**: Esta aba funciona como um dashboard de Business Intelligence. Ela apresenta:
+    * Uma amostra dos dados processados.
+    * Um gráfico de linha (`st.line_chart`) mostrando a sazonalidade das vendas (Total de Vendas por Mês), evidenciando os picos de final de ano.
+    * Um gráfico de barras (`st.bar_chart`) com o total de vendas por tipo de loja, confirmando que as lojas "Tipo A" são as principais geradoras de receita.
+
+2.  **Aba "Simulador de Previsão"**: Esta aba contém a ferramenta de IA. Ela exibe o resultado da previsão gerada pelo formulário da barra lateral. A lógica de previsão foi movida para ser executada e exibida apenas dentro desta aba quando o utilizador clica no botão "Gerar Previsão".
+
+Esta reestruturação cria uma experiência de utilizador muito mais limpa e profissional, separando a análise de dados históricos da simulação de cenários futuros.
+
+---
+### **Sua Ação / Próximo Passo**
+1.  **Substitua** o conteúdo completo do seu `app.py` pelo novo código acima.
+2.  **Salve** o arquivo (`Ctrl + S`).
+3.  Observe o seu navegador. A aplicação deverá recarregar e, em vez de uma página única, você verá **duas abas clicáveis**.
+
+Explore a nova aba de "Análise dos Dados" e veja os gráficos. Depois, clique na aba "Simulador" e teste a previsão. Me dê um **"ok"** quando confirmar que a nova estrutura está a funcionar!
+
+
+### 7.5. Bloco 15: Análise Comparativa com E-commerce UK
+
+Para cumprir o objetivo secundário do projeto, uma terceira aba foi adicionada ao dashboard para analisar e comparar os dados do Walmart (varejo físico) com um conjunto de dados de um E-commerce do Reino Unido (arquivo `online_retail_II.csv`).
+
+**Funcionalidades Implementadas:**
+
+1.  **Carregamento de Novos Dados:** Foi atualizada a função (`carregar_dados_uk`) para ler e carregar o arquivo `.csv` do E-commerce, utilizando o encoding `latin1` para compatibilidade.
+2.  **Limpeza de Dados (On-the-fly):** Os dados de e-commerce são conhecidos por serem "sujos" (ex: devoluções com quantidade negativa, datas inválidas). A aplicação realiza uma limpeza em tempo real, filtrando transações inválidas (com `Quantity` ou `Price` menores ou iguais a zero) antes de gerar as análises.
+3.  **Gráficos Comparativos:**
+    * **Sazonalidade (Vendas por Mês):** Um gráfico de linha mostra o volume de vendas do e-commerce ao longo do ano. Isso permite uma comparação visual direta com o gráfico de sazonalidade do Walmart na Aba 1.
+    * **Distribuição Geográfica (Vendas por País):** Um gráfico de barras mostra os principais países consumidores, destacando a natureza global do e-commerce em contraste com o foco regional do varejo físico.

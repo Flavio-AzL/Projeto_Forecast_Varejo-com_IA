@@ -47,9 +47,17 @@ print(f"   - X_test: {X_test.shape},  y_test: {y_test.shape}")
 
 
 # 5. Treinando o modelo de Machine Learning (Random Forest)
-print("\n--- Treinando o modelo Random Forest Regressor ---")
-# n_jobs=-1 usa todos os processadores disponíveis para acelerar o treinamento
-modelo = RandomForestRegressor(n_jobs=-1, random_state=42)
+# ==============================================================================
+# Bloco 16: Criando um Modelo Otimizado para Deploy (Balanço de Tamanho/Performance)
+# ==============================================================================
+print("\n--- Treinando o modelo OTIMIZADO PARA DEPLOY (leve) ---")
+modelo = RandomForestRegressor(
+    n_estimators=50,     # Metade das árvores padrão
+    max_depth=20,        # Limite de profundidade (evita ficheiros gigantes)
+    min_samples_leaf=5,  # Ajuda a podar e a generalizar
+    n_jobs=-1, 
+    random_state=42
+)
 
 # O comando .fit() é onde a "mágica" acontece: o modelo aprende com os dados de treino
 modelo.fit(X_train, y_train)
